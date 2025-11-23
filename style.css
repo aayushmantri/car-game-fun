@@ -1,0 +1,697 @@
+/* ===== CSS RESET & BASE ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Color Palette - Vibrant & Modern */
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+
+    --bg-dark: #0a0e27;
+    --bg-darker: #060918;
+    --text-light: #ffffff;
+    --text-muted: #a0aec0;
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --glow: 0 0 20px rgba(102, 126, 234, 0.5);
+
+    /* Typography */
+    --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+body {
+    font-family: var(--font-main);
+    background: var(--bg-darker);
+    color: var(--text-light);
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* ===== CANVAS ===== */
+#game-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 1;
+}
+
+/* ===== SCREENS ===== */
+.screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+    animation: fadeIn 0.5s ease;
+}
+
+.screen.active {
+    display: flex;
+}
+
+/* ===== LOADING SCREEN ===== */
+.loading-content {
+    text-align: center;
+}
+
+.game-title {
+    font-size: 3rem;
+    font-weight: 800;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.5rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    margin: 2rem auto;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-text {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+/* ===== MAIN MENU ===== */
+.menu-content {
+    max-width: 800px;
+    width: 90%;
+    max-height: 85vh;
+    padding: 1.5rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+.menu-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.menu-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.menu-content::-webkit-scrollbar-thumb {
+    background: var(--primary-gradient);
+    border-radius: 4px;
+}
+
+.game-subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.menu-section {
+    margin-bottom: 1.5rem;
+}
+
+.menu-section h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    color: var(--text-light);
+}
+
+/* Car Selection */
+.car-selection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.car-option {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.car-option:hover {
+    transform: translateY(-3px);
+    border-color: #667eea;
+    box-shadow: var(--glow);
+}
+
+.car-option.selected {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+    border-color: #667eea;
+    box-shadow: var(--glow);
+}
+
+.car-preview {
+    width: 100%;
+    height: 80px;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+}
+
+.car-option h3 {
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+}
+
+.car-option p {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+/* Environment Selection */
+.environment-selection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.env-option {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.env-option:hover {
+    transform: translateY(-3px);
+    border-color: #4facfe;
+    box-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+}
+
+.env-option.selected {
+    background: linear-gradient(135deg, rgba(79, 172, 254, 0.2) 0%, rgba(0, 242, 254, 0.2) 100%);
+    border-color: #4facfe;
+    box-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+}
+
+.env-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.env-option h3 {
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+}
+
+.env-option p {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+/* Buttons */
+.btn-primary,
+.btn-secondary {
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--font-main);
+    display: block;
+    margin: 1.5rem auto;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    color: var(--text-light);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg), var(--glow);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--glass-border);
+    color: var(--text-light);
+    width: 80%;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* ===== GAME HUD ===== */
+#game-hud {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+#game-hud.hidden {
+    display: none;
+}
+
+/* Speedometer */
+.hud-speedometer {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+}
+
+.speedometer-dial {
+    width: 120px;
+    height: 120px;
+    position: relative;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.8) 100%);
+    border: 3px solid rgba(102, 126, 234, 0.5);
+    margin-bottom: 1rem;
+}
+
+.speedometer-needle {
+    position: absolute;
+    width: 4px;
+    height: 50px;
+    background: linear-gradient(to top, #667eea, #f5576c);
+    bottom: 50%;
+    left: 50%;
+    transform-origin: bottom center;
+    transform: translateX(-50%) rotate(-90deg);
+    border-radius: 2px;
+    transition: transform 0.2s ease;
+    box-shadow: 0 0 10px rgba(245, 87, 108, 0.8);
+}
+
+.speedometer-center {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: #667eea;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.8);
+}
+
+.speed-value {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.speed-unit {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-left: 0.3rem;
+}
+
+/* Minimap */
+.hud-minimap {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 0.5rem;
+    box-shadow: var(--shadow-md);
+}
+
+#minimap-canvas {
+    display: block;
+    border-radius: 8px;
+}
+
+/* Controls Info */
+.hud-controls {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 1rem;
+    box-shadow: var(--shadow-md);
+}
+
+.control-hint {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.control-hint:last-child {
+    margin-bottom: 0;
+}
+
+kbd {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-right: 0.3rem;
+}
+
+/* Camera Mode */
+.hud-camera-mode {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 0.8rem 1.5rem;
+    box-shadow: var(--shadow-md);
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+/* Play/Pause Button */
+.hud-play-pause {
+    position: absolute;
+    top: 30px;
+    right: 200px;
+    z-index: 20;
+}
+
+.play-pause-btn {
+    width: 60px;
+    height: 60px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--glass-border);
+    border-radius: 50%;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: all;
+}
+
+.play-pause-btn:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: var(--shadow-lg), var(--glow);
+}
+
+.play-pause-btn:active {
+    transform: scale(0.95);
+}
+
+.play-pause-btn .hidden {
+    display: none;
+}
+
+.play-pause-btn.paused .pause-icon {
+    display: none;
+}
+
+.play-pause-btn.paused .play-icon {
+    display: block;
+}
+
+/* ===== MOBILE CONTROLS ===== */
+#mobile-controls {
+    pointer-events: all;
+}
+
+#mobile-controls.hidden {
+    display: none;
+}
+
+.joystick-container {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+}
+
+.joystick {
+    width: 120px;
+    height: 120px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 3px solid var(--glass-border);
+    border-radius: 50%;
+    position: relative;
+    box-shadow: var(--shadow-md);
+}
+
+.joystick-knob {
+    width: 50px;
+    height: 50px;
+    background: var(--accent-gradient);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 15px rgba(79, 172, 254, 0.8);
+    transition: all 0.1s ease;
+}
+
+.mobile-buttons {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mobile-btn {
+    width: 60px;
+    height: 60px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--glass-border);
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-md);
+    pointer-events: all;
+}
+
+.mobile-btn:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== PAUSE MENU ===== */
+.overlay-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+}
+
+.overlay-menu.hidden {
+    display: none;
+}
+
+.menu-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 2px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    min-width: 300px;
+}
+
+.menu-panel h2 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+}
+
+/* ===== RESPONSIVE - MOBILE ===== */
+@media (max-width: 768px) {
+    .game-title {
+        font-size: 2rem;
+    }
+
+    .menu-content {
+        padding: 1rem;
+        max-height: 90vh;
+    }
+
+    .car-selection,
+    .environment-selection {
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+    }
+
+    .car-preview {
+        height: 60px;
+        font-size: 2rem;
+    }
+
+    .env-icon {
+        font-size: 2.5rem;
+    }
+
+    .hud-controls {
+        display: none;
+    }
+
+    .hud-speedometer {
+        bottom: 180px;
+        left: 20px;
+        padding: 1rem;
+    }
+
+    .speedometer-dial {
+        width: 80px;
+        height: 80px;
+    }
+
+    .speedometer-needle {
+        height: 35px;
+    }
+
+    .speed-value {
+        font-size: 1.5rem;
+    }
+
+    .hud-minimap {
+        top: 20px;
+        right: 20px;
+    }
+
+    #minimap-canvas {
+        width: 100px;
+        height: 100px;
+    }
+
+    .hud-play-pause {
+        top: 20px;
+        right: 140px;
+    }
+
+    .play-pause-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+}
+
+@media (orientation: landscape) and (max-width: 900px) {
+    .hud-speedometer {
+        bottom: 20px;
+        left: 20px;
+    }
+
+    .mobile-buttons {
+        bottom: 20px;
+        right: 20px;
+    }
+}

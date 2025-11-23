@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Fun open-world 3D car driving game with multiple environments and vehicles">
+    <title>Open Road - Drive Anywhere</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="screen active">
+        <div class="loading-content">
+            <h1 class="game-title">🚗 Open Road</h1>
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Loading assets...</p>
+        </div>
+    </div>
+
+    <!-- Main Menu -->
+    <div id="main-menu" class="screen">
+        <div class="menu-content">
+            <h1 class="game-title">🚗 Open Road</h1>
+            <p class="game-subtitle">Drive Anywhere, Anytime</p>
+
+            <div class="menu-section">
+                <h2>Choose Your Car</h2>
+                <div class="car-selection">
+                    <div class="car-option" data-car="sports">
+                        <div class="car-preview" id="sports-preview"></div>
+                        <h3>Sports Car</h3>
+                        <p>Fast & Agile</p>
+                    </div>
+                    <div class="car-option" data-car="suv">
+                        <div class="car-preview" id="suv-preview"></div>
+                        <h3>SUV</h3>
+                        <p>Sturdy & Powerful</p>
+                    </div>
+                    <div class="car-option" data-car="classic">
+                        <div class="car-preview" id="classic-preview"></div>
+                        <h3>Classic Car</h3>
+                        <p>Vintage Style</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <h2>Choose Your Environment</h2>
+                <div class="environment-selection">
+                    <div class="env-option" data-env="city">
+                        <div class="env-icon">🏙️</div>
+                        <h3>City</h3>
+                        <p>Urban streets & buildings</p>
+                    </div>
+                    <div class="env-option" data-env="countryside">
+                        <div class="env-icon">🌾</div>
+                        <h3>Countryside</h3>
+                        <p>Rolling hills & farms</p>
+                    </div>
+                    <div class="env-option" data-env="hilly">
+                        <div class="env-icon">⛰️</div>
+                        <h3>Hilly</h3>
+                        <p>Mountains & cliffs</p>
+                    </div>
+                </div>
+            </div>
+
+            <button id="start-game-btn" class="btn-primary" disabled>Start Driving</button>
+        </div>
+    </div>
+
+    <!-- Game Canvas -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Game HUD -->
+    <div id="game-hud" class="hidden">
+        <!-- Speedometer -->
+        <div class="hud-speedometer">
+            <div class="speedometer-dial">
+                <div class="speedometer-needle" id="speed-needle"></div>
+                <div class="speedometer-center"></div>
+            </div>
+            <div class="speed-value">
+                <span id="speed-number">0</span>
+                <span class="speed-unit">km/h</span>
+            </div>
+        </div>
+
+        <!-- Minimap -->
+        <div class="hud-minimap">
+            <canvas id="minimap-canvas" width="150" height="150"></canvas>
+        </div>
+
+        <!-- Controls Info -->
+        <div class="hud-controls">
+            <div class="control-hint">
+                <kbd>W/↑</kbd> Accelerate
+            </div>
+            <div class="control-hint">
+                <kbd>S/↓</kbd> Brake
+            </div>
+            <div class="control-hint">
+                <kbd>A/←</kbd> <kbd>D/→</kbd> Steer
+            </div>
+            <div class="control-hint">
+                <kbd>C</kbd> Camera
+            </div>
+            <div class="control-hint">
+                <kbd>P</kbd> Pause
+            </div>
+        </div>
+
+        <!-- Play/Pause Button -->
+        <div class="hud-play-pause">
+            <button id="play-pause-btn" class="play-pause-btn" title="Pause (P)">
+                <span class="pause-icon">⏸️</span>
+                <span class="play-icon hidden">▶️</span>
+            </button>
+        </div>
+
+        <!-- Camera Mode Indicator -->
+        <div class="hud-camera-mode">
+            <span id="camera-mode-text">Follow Camera</span>
+        </div>
+
+        <!-- Mobile Touch Controls -->
+        <div id="mobile-controls" class="hidden">
+            <div class="joystick-container">
+                <div class="joystick" id="steering-joystick">
+                    <div class="joystick-knob"></div>
+                </div>
+            </div>
+            <div class="mobile-buttons">
+                <button class="mobile-btn" id="accelerate-btn">⬆️</button>
+                <button class="mobile-btn" id="brake-btn">⬇️</button>
+                <button class="mobile-btn" id="camera-btn">📷</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pause Menu -->
+    <div id="pause-menu" class="overlay-menu hidden">
+        <div class="menu-panel">
+            <h2>Paused</h2>
+            <button class="btn-secondary" id="resume-btn">Resume</button>
+            <button class="btn-secondary" id="restart-btn">Restart</button>
+            <button class="btn-secondary" id="main-menu-btn">Main Menu</button>
+        </div>
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+    <!-- Game Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/biomes.js"></script>
+    <script src="js/carModels.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/physics.js"></script>
+    <script src="js/car.js"></script>
+    <script src="js/terrain.js"></script>
+    <script src="js/road.js"></script>
+    <script src="js/environment.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/game.js"></script>
+</body>
+
+</html>
