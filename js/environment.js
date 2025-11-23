@@ -1,10 +1,11 @@
 // ===== ENVIRONMENT ELEMENTS =====
 
 class Environment {
-    constructor(scene, biome, terrain) {
+    constructor(scene, biome, terrain, roadSystem) {
         this.scene = scene;
         this.biome = biome;
         this.terrain = terrain;
+        this.roadSystem = roadSystem;
         this.objects = [];
         this.clouds = [];
         this.placedObjects = new Set();
@@ -99,6 +100,15 @@ class Environment {
             for (let z = startZ; z <= endZ; z += gridSize) {
                 const key = `${x},${z}`;
                 if (this.placedObjects.has(key)) continue;
+
+                // Check if on road
+                if (this.roadSystem) {
+                    const pos = new THREE.Vector3(x, 0, z);
+                    if (this.roadSystem.isOnRoad(pos)) {
+                        this.placedObjects.add(key); // Mark as processed so we don't try again
+                        continue;
+                    }
+                }
 
                 // Check if we should place objects here
                 if (this.biome.environment.trees && this.biome.environment.trees.enabled) {

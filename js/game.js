@@ -53,21 +53,22 @@ class Game {
         // Initialize terrain
         this.terrain = new Terrain(this.renderer.getScene(), this.selectedBiome);
 
+        // Initialize road (pass terrain)
+        this.road = new RoadSystem(this.renderer.getScene(), this.selectedBiome, this.terrain);
+        this.road.initialize(new THREE.Vector3(0, 0, 0));
+
         // Initialize car
         this.car = new Car(this.renderer.getScene(), carType, 0);
         this.car.setTerrain(this.terrain);
         this.car.setRoad(this.road); // Connect road to car for road-following
         this.car.reset(new THREE.Vector3(0, 2, 0), 0);
 
-        // Initialize road
-        this.road = new RoadSystem(this.renderer.getScene(), this.selectedBiome);
-        this.road.initialize(new THREE.Vector3(0, 0, 0));
-
-        // Initialize environment
+        // Initialize environment (pass road)
         this.environment = new Environment(
             this.renderer.getScene(),
             this.selectedBiome,
-            this.terrain
+            this.terrain,
+            this.road
         );
         this.environment.initialize();
 
@@ -79,6 +80,9 @@ class Game {
 
         // Setup play/pause button
         this.setupPlayPauseButton();
+
+        // Setup day/night button
+        this.setupDayNightButton();
 
         // Start game loop
         this.isRunning = true;
@@ -96,6 +100,21 @@ class Game {
         }
     }
 
+    setupDayNightButton() {
+        const dayNightBtn = document.getElementById('day-night-btn');
+        if (dayNightBtn) {
+            dayNightBtn.addEventListener('click', () => {
+                this.toggleDayNight();
+            });
+        }
+    }
+
+    toggleDayNight() {
+        this.renderer.isDayMode = !this.renderer.isDayMode;
+        this.renderer.setTimeOfDay(this.renderer.isDayMode);
+        this.ui.toggleDayNightMode(this.renderer.isDayMode);
+    }
+
     togglePause() {
         this.isPaused = !this.isPaused;
 
@@ -104,9 +123,19 @@ class Game {
             if (this.isPaused) {
                 playPauseBtn.classList.add('paused');
                 playPauseBtn.title = 'Play (P)';
+                const pauseIcon = playPauseBtn.querySelector('.pause-icon');
+                const playIcon = playPauseBtn.querySelector('.play-icon');
+                if (pauseIcon) pauseIcon.classList.add('hidden');
+                if (playIcon) playIcon.classList.remove('hidden');
+                this.ui.showPauseMenu();
             } else {
                 playPauseBtn.classList.remove('paused');
                 playPauseBtn.title = 'Pause (P)';
+                const pauseIcon = playPauseBtn.querySelector('.pause-icon');
+                const playIcon = playPauseBtn.querySelector('.play-icon');
+                if (pauseIcon) pauseIcon.classList.remove('hidden');
+                if (playIcon) playIcon.classList.add('hidden');
+                this.ui.hidePauseMenu();
                 // Reset lastTime to prevent large delta on resume
                 this.lastTime = performance.now();
             }
@@ -121,6 +150,16 @@ class Game {
         // Check for pause toggle
         if (this.controls.isPauseSwitchPressed()) {
             this.togglePause();
+        }
+
+        // Check for day/night toggle (N key)
+        if (this.controls.keys['n'] || this.controls.keys['N']) {
+            if (!this.controls.dayNightTogglePressed) {
+                this.toggleDayNight();
+                this.controls.dayNightTogglePressed = true;
+            }
+        } else {
+            this.controls.dayNightTogglePressed = false;
         }
 
         // Skip updates if paused

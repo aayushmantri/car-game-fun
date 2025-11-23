@@ -105,4 +105,31 @@ class UI {
             menu.classList.add('hidden');
         }
     }
+
+    updateDayNightIcon(isDay) {
+        const btn = document.getElementById('day-night-btn');
+        if (btn) {
+            const sunIcon = btn.querySelector('.sun-icon');
+            const moonIcon = btn.querySelector('.moon-icon');
+
+            if (isDay) {
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+                btn.title = "Switch to Night (N)";
+            } else {
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+                btn.title = "Switch to Day (N)";
+            }
+        }
+    }
+
+    toggleDayNightMode(isDay) {
+        if (isDay) {
+            document.body.classList.add('day-mode');
+        } else {
+            document.body.classList.remove('day-mode');
+        }
+        this.updateDayNightIcon(isDay);
+    }
 }

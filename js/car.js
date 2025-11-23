@@ -18,12 +18,20 @@ class Car {
         this.steering = 0;
         this.wheelRotation = 0;
 
-        // Car properties
+        // Physics properties
         this.maxSpeed = this.model.stats.maxSpeed / 3.6; // Convert km/h to m/s
         this.acceleration = this.model.stats.acceleration;
         this.braking = this.model.stats.braking;
         this.handling = this.model.stats.handling;
-        this.friction = 0.95;
+        this.friction = 0.98; // Higher friction for better control
+        this.airResistance = 0.99;
+
+        // Suspension settings
+        this.suspensionHeight = 0.5;
+        this.suspensionRestLength = 0.5;
+        this.suspensionStiffness = 20.0;
+        this.suspensionDamping = 2.0;
+        this.verticalVelocity = 0;
 
         // Control state
         this.controls = {
@@ -59,7 +67,7 @@ class Car {
     }
 
     update(deltaTime) {
-        // Handle acceleration
+        // 1. Handle Acceleration & Braking
         if (this.controls.forward) {
             this.speed += this.acceleration * deltaTime;
         }
@@ -71,20 +79,22 @@ class Car {
             }
         }
 
-        // Apply friction
+        // 2. Apply Friction & Air Resistance
         if (!this.controls.forward && !this.controls.backward) {
             this.speed *= this.friction;
         }
+        this.speed *= this.airResistance;
 
         // Clamp speed
         this.speed = clamp(this.speed, -this.maxSpeed * 0.5, this.maxSpeed);
 
-        // Handle steering (only when moving)
+        // 3. Handle Steering
         if (Math.abs(this.speed) > 0.1) {
+            const turnFactor = Math.min(Math.abs(this.speed) / 5, 1.0); // Less steering at very low speeds
             if (this.controls.left) {
-                this.steering = this.handling;
+                this.steering = this.handling * turnFactor;
             } else if (this.controls.right) {
-                this.steering = -this.handling;
+                this.steering = -this.handling * turnFactor;
             } else {
                 this.steering *= 0.9; // Smooth return to center
             }
@@ -95,14 +105,41 @@ class Car {
             this.steering *= 0.9;
         }
 
-        // Update position based on speed and rotation
+        // 4. Update Horizontal Position
         const moveX = Math.sin(this.rotation) * this.speed * deltaTime;
         const moveZ = Math.cos(this.rotation) * this.speed * deltaTime;
 
         this.position.x += moveX;
         this.position.z += moveZ;
 
-        // Road-following behavior
+        // 5. Suspension & Vertical Physics
+        let groundHeight = 0;
+        if (this.terrain) {
+            groundHeight = this.terrain.getHeightAt(this.position.x, this.position.z);
+        }
+
+        // Raycast down to find ground
+        const currentHeight = this.position.y;
+        const compression = (groundHeight + this.suspensionRestLength) - currentHeight;
+
+        // Spring force: F = k * x
+        const springForce = compression * this.suspensionStiffness;
+
+        // Damping force: F = -c * v
+        const dampingForce = -this.verticalVelocity * this.suspensionDamping;
+
+        const totalVerticalForce = springForce + dampingForce - 9.81; // Gravity
+
+        this.verticalVelocity += totalVerticalForce * deltaTime;
+        this.position.y += this.verticalVelocity * deltaTime;
+
+        // Hard floor constraint to prevent falling through world
+        if (this.position.y < groundHeight) {
+            this.position.y = groundHeight;
+            this.verticalVelocity = 0;
+        }
+
+        // 6. Road-Following Logic
         if (this.road && this.speed > 0.1) {
             const onRoad = this.road.isOnRoad(this.position);
 
@@ -128,10 +165,28 @@ class Car {
             }
         }
 
-        // Get terrain height at car position
+        // 7. Calculate Chassis Tilt (Pitch & Roll)
         if (this.terrain) {
-            const terrainHeight = this.terrain.getHeightAt(this.position.x, this.position.z);
-            this.position.y = terrainHeight + 0.5; // Car height above ground
+            // Sample terrain at 4 points around the car
+            const offset = 1.0;
+            const hF = this.terrain.getHeightAt(this.position.x + Math.sin(this.rotation) * offset, this.position.z + Math.cos(this.rotation) * offset);
+            const hB = this.terrain.getHeightAt(this.position.x - Math.sin(this.rotation) * offset, this.position.z - Math.cos(this.rotation) * offset);
+            const hL = this.terrain.getHeightAt(this.position.x + Math.sin(this.rotation + Math.PI / 2) * offset, this.position.z + Math.cos(this.rotation + Math.PI / 2) * offset);
+            const hR = this.terrain.getHeightAt(this.position.x - Math.sin(this.rotation + Math.PI / 2) * offset, this.position.z - Math.cos(this.rotation + Math.PI / 2) * offset);
+
+            // Pitch (Forward/Backward tilt)
+            const targetPitch = Math.atan2(hB - hF, offset * 2);
+
+            // Roll (Left/Right tilt)
+            const targetRoll = Math.atan2(hL - hR, offset * 2);
+
+            // Add dynamic tilt from acceleration/steering
+            const accelPitch = (this.speed / this.maxSpeed) * 0.05;
+            const steerRoll = this.steering * (this.speed / this.maxSpeed) * 0.2;
+
+            // Smoothly interpolate rotation
+            this.mesh.rotation.x = lerp(this.mesh.rotation.x, targetPitch - accelPitch, 0.1);
+            this.mesh.rotation.z = lerp(this.mesh.rotation.z, targetRoll + steerRoll, 0.1);
         }
 
         // Update mesh position and rotation
@@ -151,14 +206,6 @@ class Car {
                 }
             });
         }
-
-        // Tilt car based on steering
-        const tiltAmount = this.steering * this.speed / this.maxSpeed * 0.1;
-        this.mesh.rotation.z = lerp(this.mesh.rotation.z, tiltAmount, 0.1);
-
-        // Pitch based on speed
-        const pitchAmount = (this.speed / this.maxSpeed) * 0.05;
-        this.mesh.rotation.x = lerp(this.mesh.rotation.x, -pitchAmount, 0.1);
     }
 
     getPosition() {

@@ -6,7 +6,9 @@ class GameRenderer {
         this.camera = null;
         this.renderer = null;
         this.lights = {};
-        this.timeOfDay = 0.5; // 0 = midnight, 0.5 = noon, 1 = midnight
+        this.timeOfDay = 0; // 0 = night, 0.5 = day (noon)
+        this.targetTimeOfDay = 0;
+        this.isDayMode = false;
     }
 
     init() {
@@ -38,7 +40,7 @@ class GameRenderer {
         this.setupLighting();
 
         // Setup fog
-        this.scene.fog = new THREE.Fog(0x87ceeb, 50, 300);
+        this.scene.fog = new THREE.Fog(0x0a0e27, 50, 300);
 
         // Handle window resize
         window.addEventListener('resize', () => this.onWindowResize());
@@ -48,10 +50,10 @@ class GameRenderer {
 
     setupLighting() {
         // Ambient light
-        this.lights.ambient = new THREE.AmbientLight(0xffffff, 0.4);
+        this.lights.ambient = new THREE.AmbientLight(0xffffff, 0.3);
         this.scene.add(this.lights.ambient);
 
-        // Directional light (sun)
+        // Directional light (sun/moon)
         this.lights.sun = new THREE.DirectionalLight(0xffffff, 0.8);
         this.lights.sun.position.set(50, 100, 50);
         this.lights.sun.castShadow = true;
@@ -69,49 +71,75 @@ class GameRenderer {
         this.scene.add(this.lights.sun);
 
         // Hemisphere light for better ambient lighting
-        this.lights.hemisphere = new THREE.HemisphereLight(0x87ceeb, 0x7cb342, 0.3);
+        this.lights.hemisphere = new THREE.HemisphereLight(0x0a0e27, 0x000000, 0.5);
         this.scene.add(this.lights.hemisphere);
     }
 
     updateLighting(biome) {
-        // Update fog color based on biome
-        const fogColor = new THREE.Color(biome.colors.fog);
-        this.scene.fog.color = fogColor;
-        this.scene.background = fogColor;
+        this.biome = biome;
+        this.updateDayNightCycle(0); // Force update
+    }
 
-        // Update hemisphere light colors
-        const skyColor = new THREE.Color(biome.colors.sky.top);
-        const groundColor = new THREE.Color(biome.colors.ground);
-        this.lights.hemisphere.color = skyColor;
-        this.lights.hemisphere.groundColor = groundColor;
+    setTimeOfDay(isDay) {
+        this.isDayMode = isDay;
+        this.targetTimeOfDay = isDay ? 0.5 : 0;
     }
 
     updateDayNightCycle(deltaTime) {
-        // Cycle through day and night (very slow)
-        this.timeOfDay += deltaTime * 0.01;
-        if (this.timeOfDay > 1) this.timeOfDay = 0;
+        // Smoothly transition time
+        const diff = this.targetTimeOfDay - this.timeOfDay;
+        if (Math.abs(diff) > 0.001) {
+            this.timeOfDay += diff * deltaTime * 2; // Transition speed
+        } else {
+            this.timeOfDay = this.targetTimeOfDay;
+        }
 
         // Calculate sun intensity based on time of day
-        const sunIntensity = Math.max(0.2, Math.sin(this.timeOfDay * Math.PI * 2) * 0.6 + 0.4);
-        this.lights.sun.intensity = sunIntensity;
+        // 0 = Night, 0.5 = Noon
+        // Simple interpolation for now
 
-        // Calculate sun position
-        const angle = this.timeOfDay * Math.PI * 2;
+        let sunIntensity, ambientIntensity;
+        let skyColorTop, skyColorBottom, fogColor, groundColor;
+
+        if (this.biome) {
+            if (this.timeOfDay > 0.25) {
+                // DAY
+                sunIntensity = 1.0;
+                ambientIntensity = 0.6;
+                skyColorTop = new THREE.Color(this.biome.colors.sky.top);
+                skyColorBottom = new THREE.Color(this.biome.colors.sky.bottom);
+                fogColor = new THREE.Color(this.biome.colors.fog);
+                groundColor = new THREE.Color(this.biome.colors.ground);
+
+                this.lights.sun.color.setHex(0xffffff);
+            } else {
+                // NIGHT
+                sunIntensity = 0.2;
+                ambientIntensity = 0.2;
+                skyColorTop = new THREE.Color(0x0f172a);
+                skyColorBottom = new THREE.Color(0x1e293b);
+                fogColor = new THREE.Color(0x0f172a);
+                groundColor = new THREE.Color(0x050505);
+
+                this.lights.sun.color.setHex(0xa5b4fc); // Blueish moonlight
+            }
+        } else {
+            return;
+        }
+
+        // Apply values
+        this.lights.sun.intensity = sunIntensity;
+        this.lights.ambient.intensity = ambientIntensity;
+        this.scene.fog.color.lerp(fogColor, 0.1);
+        this.scene.background = this.scene.fog.color;
+
+        this.lights.hemisphere.color.lerp(skyColorTop, 0.1);
+        this.lights.hemisphere.groundColor.lerp(groundColor, 0.1);
+
+        // Move sun/moon
+        const angle = (this.timeOfDay - 0.25) * Math.PI * 2; // Adjust so 0.5 is top
         this.lights.sun.position.x = Math.cos(angle) * 100;
         this.lights.sun.position.y = Math.sin(angle) * 100;
-
-        // Adjust ambient light
-        this.lights.ambient.intensity = Math.max(0.2, sunIntensity * 0.5);
-
-        // Update sun color (warmer at sunrise/sunset)
-        const sunHeight = Math.sin(angle);
-        if (sunHeight < 0.3 && sunHeight > -0.3) {
-            // Sunrise/sunset - orange tint
-            this.lights.sun.color.setHex(0xffaa66);
-        } else {
-            // Day - white light
-            this.lights.sun.color.setHex(0xffffff);
-        }
     }
 
     onWindowResize() {
