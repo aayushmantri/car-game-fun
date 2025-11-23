@@ -426,61 +426,6 @@ kbd {
     border: 2px solid var(--glass-border);
     border-radius: 12px;
     padding: 0.8rem 1.5rem;
-    box-shadow: var(--shadow-md);
-    font-weight: 600;
-    color: var(--text-light);
-}
-
-/* Play/Pause Button */
-.hud-play-pause {
-    position: absolute;
-    top: 30px;
-    right: 200px;
-    z-index: 20;
-}
-
-.play-pause-btn {
-    width: 60px;
-    height: 60px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    border: 2px solid var(--glass-border);
-    border-radius: 50%;
-    font-size: 1.8rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: var(--shadow-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: all;
-}
-
-.play-pause-btn:hover {
-    transform: scale(1.1);
-    background: rgba(255, 255, 255, 0.2);
-    box-shadow: var(--shadow-lg), var(--glow);
-}
-
-.play-pause-btn:active {
-    transform: scale(0.95);
-}
-
-.play-pause-btn .hidden {
-    display: none;
-}
-
-.play-pause-btn.paused .pause-icon {
-    display: none;
-}
-
-.play-pause-btn.paused .play-icon {
-    display: block;
-}
-
-/* ===== MOBILE CONTROLS ===== */
-#mobile-controls {
-    pointer-events: all;
 }
 
 #mobile-controls.hidden {

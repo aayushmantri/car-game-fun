@@ -7,7 +7,9 @@ class Controls {
             backward: false,
             left: false,
             right: false,
-            camera: false
+            camera: false,
+            pause: false,
+            dayNight: false
         };
 
         this.mobile = isMobile();
@@ -48,6 +50,11 @@ class Controls {
                         this.keys.pause = true;
                     }
                     break;
+                case 'n':
+                    if (!this.keys.dayNight) {
+                        this.keys.dayNight = true;
+                    }
+                    break;
             }
         });
 
@@ -74,6 +81,9 @@ class Controls {
                     break;
                 case 'p':
                     this.keys.pause = false;
+                    break;
+                case 'n':
+                    this.keys.dayNight = false;
                     break;
             }
         });
@@ -201,6 +211,14 @@ class Controls {
         const pressed = this.keys.pause;
         if (pressed) {
             this.keys.pause = false; // Reset to prevent multiple triggers
+        }
+        return pressed;
+    }
+
+    isDayNightSwitchPressed() {
+        const pressed = this.keys.dayNight;
+        if (pressed) {
+            this.keys.dayNight = false; // Reset to prevent multiple triggers
         }
         return pressed;
     }
